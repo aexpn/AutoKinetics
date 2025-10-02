@@ -1,7 +1,3 @@
-Gerne. Um die **LICENSE**-Datei so anzupassen, dass sie Ihre Urheberschaft korrekt ausweist, ersetzen Sie bitte die Platzhalter im Text vom letzten Mal durch Ihren Namen und das Jahr.
-
-Hier ist der angepasste Text für die Datei **`LICENSE`** (mit den Platzhaltern für Sie ausgefüllt):
-
 ```
 Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
 
