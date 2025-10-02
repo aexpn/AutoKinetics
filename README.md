@@ -24,8 +24,8 @@ A computational tool for the visual construction and numerical simulation of che
 ## 📊 Example Simulation Output
 
 Below is an example of the output generated for the first-order isomerization of cyclopropane to propene. The application provides a comprehensive view of the system's dynamics.
-<img width="802" height="751" alt="image" src="https://github.com/user-attachments/assets/ae3106f9-5380-4db1-9b26-8ff6d7d6849a" />
 <img width="802" height="751" alt="Screenshot from 2025-10-03 00-23-31" src="https://github.com/user-attachments/assets/b301f5fa-6b0d-4132-bbd2-b306fd120e25" />
+<img width="802" height="751" alt="image" src="https://github.com/user-attachments/assets/ae3106f9-5380-4db1-9b26-8ff6d7d6849a" />
 
 ---
 
