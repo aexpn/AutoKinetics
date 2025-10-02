@@ -1,6 +1,5 @@
 # AutoKinetics: A Visual Simulator for Chemical Reaction Networks
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Framework](https://img.shields.io/badge/Framework-PyQt6-green.svg)](https://www.qt.io/qt-for-python)
 
@@ -161,4 +160,11 @@ Future development will focus on enhancing the scientific accuracy and user expe
 
 ## 📜 License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License (CC BY-NC-SA 4.0)**.
+
+**This means:**
+1. **Attribution (BY):** You must give appropriate credit to the creator.
+2. **Non-Commercial (NC):** Use **is prohibited for commercial purposes** (profit generation).
+3. **ShareAlike (SA):** Modified versions must be released under the same license.
+
+Further details can be found in the **`LICENSE`** file.
