@@ -152,6 +152,10 @@ Future development will focus on enhancing the scientific accuracy and user expe
 * [ ] **Interactive Plotting:** Replace static Matplotlib images with an interactive plotting widget (e.g., using `pyqtgraph`) directly within the GUI.
 * [ ] **Global Simulation Conditions:** Create a dedicated panel for global parameters like pressure and temperature, decoupling them from individual reactions.
 * [ ] **Reversible Reactions:** Update the ODE solver to correctly handle reversible reactions and equilibrium constants.
+* [ ] **NIST Database Integration:** Add functionality to query the NIST Chemical Kinetics Database to automatically populate species and reaction parameters.
+* [ ] **Advanced Plotting:** Include plots of analytical solutions for simple-order reactions alongside the numerical results for comparison and verification.
+* [ ] **Machine Learning Integration:** Implement ML models to predict rate constants ($k$) from molecular features or to fit complex kinetic models to sparse experimental data.
+
 
 ---
 
