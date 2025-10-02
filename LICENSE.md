@@ -1,4 +1,3 @@
-```
 Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
 
 By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License ("Public License"). To the extent this Public License may be interpreted as a contract, You are granted the Licensed Rights in consideration of Your acceptance of these terms and conditions, and the Licensor grants You such rights in consideration of benefits the Licensor receives for making the Licensed Material available under these terms and conditions.
@@ -94,8 +93,7 @@ a. For the avoidance of doubt, this Public License does not reduce, limit, restr
 b. For the avoidance of doubt, the conditions and obligations of this Public License apply to the entire Licensed Material, whether or not only parts of the material are the subject of Copyright and Similar Rights.
 c. You are responsible for ensuring that all conditions in this Public License are met.
 
-***
+---
 
 **End of CC BY-NC-SA 4.0 License Text**
 **Copyright 2025 Victor Jaenisch**
-```
