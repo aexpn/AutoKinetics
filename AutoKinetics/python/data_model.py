@@ -28,19 +28,16 @@ class Reaction:
             order_val = float(params.get('reaction_order', '1'))
             for r_idx, _ in self.reactants:
                 self.reaction_order[r_idx] = order_val
-        except ValueError:
-            for r_idx, _ in self.reactants:
-                self.reaction_order[r_idx] = 1.0
+        except (ValueError, TypeError):
+            # Fallback, falls 'reaction_order' keine gültige Zahl ist
+            for r_idx, stoich in self.reactants:
+                # Standardmäßig wird die Ordnung gleich dem stöchiometrischen Faktor gesetzt
+                self.reaction_order[r_idx] = stoich
 
     def calculate_k(self, T):
         """Berechnet die Geschwindigkeitskonstante k bei Temperatur T."""
         if self.arrhenius_A == 0: return 0.0
-        
-        # --- KORREKTUR ---
-        # Die Multiplikation mit 1000 wurde entfernt.
-        # Wir gehen davon aus, dass Ea in der .kin-Datei immer in J/mol angegeben ist.
         Ea_J_mol = self.activation_energy_Ea
-        
         k = self.arrhenius_A * (T ** self.temp_exponent_n) * np.exp(-Ea_J_mol / (R * T))
         return k
 
@@ -53,3 +50,46 @@ class ReactionSystem:
 
     def get_initial_concentrations(self):
         return np.array([s.start_concentration for s in self.species])
+
+    def get_rate_law_equations(self):
+        """Erstellt eine korrekte textuelle Darstellung des differentiellen Zeitgesetzes."""
+        equations = []
+        species_names = [s.name for s in self.species]
+        
+        for i, species in enumerate(self.species):
+            lhs = f"d[{species_names[i]}]/dt ="
+            rhs_terms = []
+
+            for reaction in self.reactions:
+                # Der Ratenterm (v) = k * [Edukt1]^ordnung1 * [Edukt2]^ordnung2
+                rate_expression_parts = [reaction.rate_label]
+                for reactant_idx, _ in reaction.reactants:
+                    order = reaction.reaction_order.get(reactant_idx, 1.0)
+                    order_str = f"^{order}" if order != 1.0 else ""
+                    rate_expression_parts.append(f"[{species_names[reactant_idx]}]" + order_str)
+                rate_expr = " * ".join(rate_expression_parts)
+
+                # Die Änderungsrate ist ±stöchiometrischer_Faktor * v
+                for reactant_idx, stoich in reaction.reactants:
+                    if reactant_idx == i:
+                        stoich_str = f"{stoich} * " if stoich != 1 else ""
+                        rhs_terms.append(f"- {stoich_str}{rate_expr}")
+                        
+                for product_idx, stoich in reaction.products:
+                    if product_idx == i:
+                        stoich_str = f"{stoich} * " if stoich != 1 else ""
+                        rhs_terms.append(f"+ {stoich_str}{rate_expr}")
+            
+            if not rhs_terms:
+                rhs = " 0.0"
+            else:
+                rhs = " ".join(rhs_terms)
+                # Führendes '+' oder '-' anpassen für saubere Darstellung
+                if rhs.startswith("+ "):
+                    rhs = rhs[1:]
+                elif rhs.startswith("- "):
+                    rhs = "-" + rhs[1:]
+
+            equations.append(lhs + rhs)
+            
+        return "\n".join(equations)

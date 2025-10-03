@@ -9,9 +9,8 @@ class ODESolver:
         self.system = system
         self.temperature = temperature
         
-        # Prüfe, welche Spezies mit QSSA behandelt werden sollen
         self.qssa_indices = [i for i, s in enumerate(self.system.species) if getattr(s, 'is_intermediate', False)]
-        self.normal_indices = [i for i, i in enumerate(self.system.species) if i not in self.qssa_indices]
+        self.normal_indices = [i for i in range(len(self.system.species)) if i not in self.qssa_indices]
 
     def _calculate_rates(self, concentrations):
         """Berechnet die Geschwindigkeiten aller Reaktionen für einen gegebenen Konzentrationsvektor."""
@@ -26,7 +25,6 @@ class ODESolver:
             rates.append(rate)
         return np.array(rates)
 
-    # --- Modell für die Standard-Simulation (OHNE QSSA) ---
     def model_standard(self, t, y):
         dydt = np.zeros_like(y)
         rates = self._calculate_rates(y)
@@ -39,7 +37,6 @@ class ODESolver:
                 dydt[product_idx] += stoich * rate
         return dydt
 
-    # --- Gleichungen und Modell für die QSSA-Simulation ---
     def _qssa_equations(self, qssa_concs, normal_concs_array):
         full_concs = np.zeros(len(self.system.species))
         full_concs[self.normal_indices] = normal_concs_array
@@ -62,7 +59,10 @@ class ODESolver:
 
     def model_qssa(self, t, y_normal):
         initial_guess = np.full(len(self.qssa_indices), 1e-9)
-        qssa_concs = fsolve(self._qssa_equations, initial_guess, args=(y_normal,))
+        # Robusterer Aufruf, der prüft, ob eine Lösung gefunden wurde
+        qssa_concs, _, ier, _ = fsolve(self._qssa_equations, initial_guess, args=(y_normal,), full_output=True)
+        if ier != 1:
+            qssa_concs.fill(1e-12) # Fallback, falls Löser versagt
         qssa_concs[qssa_concs < 0] = 0
 
         concentrations = np.zeros(len(self.system.species))
@@ -80,39 +80,33 @@ class ODESolver:
         
         return dydt_full[self.normal_indices]
 
-    # --- Haupt-Solve-Methode, die entscheidet, welcher Weg genutzt wird ---
     def solve(self, t_span, t_eval):
-        # FALL 1: Keine QSSA-Spezies, normale Simulation
         if not self.qssa_indices:
             y0 = self.system.get_initial_concentrations()
             solution = solve_ivp(
-                fun=self.model_standard,
-                t_span=t_span,
-                y0=y0,
-                t_eval=t_eval,
-                method='Radau'
+                fun=self.model_standard, t_span=t_span, y0=y0, t_eval=t_eval, method='Radau'
             )
             return solution
-        
-        # FALL 2: QSSA-Spezies vorhanden, DAE-Simulation
         else:
             y0_full = self.system.get_initial_concentrations()
             y0_normal = y0_full[self.normal_indices]
             
             solution_normal = solve_ivp(
-                fun=self.model_qssa,
-                t_span=t_span,
-                y0=y0_normal,
-                t_eval=t_eval,
-                method='Radau'
+                fun=self.model_qssa, t_span=t_span, y0=y0_normal, t_eval=t_eval, method='Radau'
             )
             
             y_full = np.zeros((len(self.system.species), len(solution_normal.t)))
             y_full[self.normal_indices, :] = solution_normal.y
             
+            last_qssa_sol = np.full(len(self.qssa_indices), 1e-9)
             for i in range(len(solution_normal.t)):
                 y_normal_t = solution_normal.y[:, i]
-                qssa_concs_t = fsolve(self._qssa_equations, np.full(len(self.qssa_indices), 1e-9), args=(y_normal_t,))
+                qssa_concs_t, _, ier, _ = fsolve(self._qssa_equations, last_qssa_sol, args=(y_normal_t,), full_output=True)
+                if ier == 1:
+                    last_qssa_sol = qssa_concs_t
+                else:
+                    qssa_concs_t.fill(1e-12)
+
                 qssa_concs_t[qssa_concs_t < 0] = 0
                 y_full[self.qssa_indices, i] = qssa_concs_t
 

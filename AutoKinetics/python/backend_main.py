@@ -13,6 +13,10 @@ def run_simulation_and_analysis(kin_filepath, sim_time_s, temp_K, plot_dir):
     Führt die gesamte Kette aus: Parsen, Simulieren, Analysieren, Plotten.
     """
     reaction_system = parse_kin_file(kin_filepath)
+    
+    # NEU: Generiere das Zeitgesetz
+    rate_law_equations = reaction_system.get_rate_law_equations()
+
     solver = ODESolver(reaction_system, temperature=temp_K)
     t_span = (0, sim_time_s)
     t_eval = np.linspace(*t_span, num=200)
@@ -22,7 +26,8 @@ def run_simulation_and_analysis(kin_filepath, sim_time_s, temp_K, plot_dir):
         "time_points": solution.t.tolist(),
         "species_names": [s.name for s in reaction_system.species],
         "concentrations": solution.y.tolist(),
-        "simulation_parameters": {"duration_s": sim_time_s, "temperature_K": temp_K}
+        "simulation_parameters": {"duration_s": sim_time_s, "temperature_K": temp_K},
+        "rate_law_equations": rate_law_equations  # NEU HINZUGEFÜGT
     }
     
     analysis_results = analyze_kinetics(sim_results, reaction_system)

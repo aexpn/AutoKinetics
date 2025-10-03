@@ -30,7 +30,7 @@ class SimulationThread(QThread):
         self.kin_file = str(kin_file_path)
         self.sim_time = sim_time
         self.temp_k = temp_k
-        self.plot_dir = plot_dir # Verwendet jetzt ein Verzeichnis
+        self.plot_dir = plot_dir
         self.python_executable = sys.executable
 
     def run(self):
@@ -66,6 +66,7 @@ class PlotDialog(QDialog):
         main_layout.addWidget(self.tabs)
 
         self.create_overview_tab()
+        self.create_rate_law_tab() 
         self.create_analysis_tabs_per_reaction()
 
     def create_overview_tab(self):
@@ -85,29 +86,42 @@ class PlotDialog(QDialog):
             image_label.setText("Konzentrationsplot konnte nicht geladen werden.")
 
         layout.addWidget(image_label)
-        self.tabs.addTab(tab, "Gesamtübersicht (Konzentrationen)")
+        self.tabs.addTab(tab, "Gesamtübersicht")
+
+    def create_rate_law_tab(self):
+        rate_laws = self.results.get("simulation", {}).get("rate_law_equations")
+        if not rate_laws:
+            return
+
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        
+        title_label = QLabel("<h3>Differentielles Zeitgesetz (ODE-System)</h3>")
+        layout.addWidget(title_label)
+
+        text_edit = QTextEdit()
+        text_edit.setReadOnly(True)
+        font = QFont("Courier New", 11) 
+        text_edit.setFont(font)
+        text_edit.setText(rate_laws)
+        
+        layout.addWidget(text_edit)
+        self.tabs.addTab(tab, "Zeitgesetz (Differentiell)")
 
     def create_analysis_tabs_per_reaction(self):
         analysis = self.results.get("analysis", {})
         plot_files = self.results.get("plot_files", {}).get("analysis_plots", {})
 
         if not analysis:
-            no_analysis_tab = QWidget()
-            no_analysis_layout = QVBoxLayout(no_analysis_tab)
-            no_analysis_layout.addWidget(QLabel("Keine Analyseergebnisse verfügbar."))
-            self.tabs.addTab(no_analysis_tab, "Analyse")
             return
 
         for rate_label, analysis_data in analysis.items():
-            # Haupt-Tab für jede Reaktion (k1, k2, ...)
             reaction_tab = QWidget()
             reaction_layout = QVBoxLayout(reaction_tab)
             
-            # Zusammenfassung für diese spezifische Reaktion
             summary_label = self.build_summary_label(rate_label, analysis_data)
             reaction_layout.addWidget(summary_label)
 
-            # Verschachteltes Tab-Widget für 0., 1., 2. Ordnung
             order_tabs = QTabWidget()
             reaction_layout.addWidget(order_tabs)
 
@@ -134,19 +148,27 @@ class PlotDialog(QDialog):
         order_map = {"zero_order": "0. Ordnung", "first_order": "1. Ordnung", "second_order": "2. Ordnung"}
         order = order_map.get(data['best_fit_order'], "unbekannt")
         k_unit = data.get('k_unit', '')
+        reactant = data['analyzed_reactant']
+
+        eq_zero = f"[{reactant}] = -k⋅t + [{reactant}]<sub>0</sub>"
+        eq_first = f"ln([{reactant}]) = -k⋅t + ln([{reactant}]<sub>0</sub>)"
+        eq_second = f"1/[{reactant}] = k⋅t + 1/[{reactant}]<sub>0</sub>"
         
         summary_text = (f"<h3>Analyse für Reaktion '{rate_label}'</h3>"
-                        f"<b>Analysierter Reaktant:</b> {data['analyzed_reactant']}<br/>"
+                        f"<b>Analysierter Reaktant:</b> {reactant}<br/>"
                         f"<b>Beste Passung:</b> {order} (R² = {data['r_squared']:.4f})<br/>"
-                        f"<b>Berechnete Rate k:</b> {data['calculated_k']:.4f} {k_unit}")
+                        f"<b>Berechnete Rate k:</b> {data['calculated_k']:.4f} {k_unit}<hr>"
+                        f"<b>Integrierte Zeitgesetze (linearisierte Form):</b><br/>"
+                        f"&nbsp;&nbsp;<b>0. Ordnung:</b> {eq_zero}<br/>"
+                        f"&nbsp;&nbsp;<b>1. Ordnung:</b> {eq_first}<br/>"
+                        f"&nbsp;&nbsp;<b>2. Ordnung:</b> {eq_second}")
         
         label = QLabel(summary_text)
-        label.setFixedHeight(100)
         return label
 
-
-# ... (Rest des Codes von AddCommand bis zum Ende von MainWindow bleibt unverändert, aber muss hier sein) ...
-# HINWEIS: Der folgende Code ist identisch zur vorherigen Version, wird aber für die Vollständigkeit der Datei benötigt.
+# =============================================================================
+# (Der Rest der Datei ab hier ist unverändert)
+# =============================================================================
 
 class AddCommand(QUndoCommand):
     def __init__(self, item, scene, description):
@@ -597,12 +619,14 @@ class GraphicsScene(QGraphicsScene):
         self.properties_panel = None
     
     def update_from_analysis(self, analysis_data):
-        arrows = [item for item in self.items() if isinstance(item, ArrowItem)]
-        for rate_label, data in analysis_data.items():
-            for arrow in arrows:
-                if arrow.rate_constant == rate_label:
-                    order_str = data['best_fit_order']; arrow.reaction_order = "0" if "zero" in order_str else "1" if "first" in order_str else "2"
-                    arrow.arrhenius_A = data['calculated_k']; arrow.activation_energy_Ea = 0; break
+        selected_arrows = [item for item in self.selectedItems() if isinstance(item, ArrowItem)]
+        if not selected_arrows:
+            return
+
+        selected_arrow = selected_arrows[0]
+        if selected_arrow.rate_constant in analysis_data:
+            if self.properties_panel:
+                self.properties_panel.show_properties(selected_arrow)
     
     def serialize(self):
         all_species = [i for i in self.items() if isinstance(i, SpeciesItem)]
@@ -785,7 +809,9 @@ class MainWindow(QMainWindow):
 
     def on_simulation_finished(self, results):
         self.statusBar().showMessage("Simulation erfolgreich!", 5000); self.start_simulation_action.setEnabled(True)
-        if "analysis" in results: self.scene.update_from_analysis(results["analysis"])
+        # BUG-FIX: Die folgende Zeile wurde entfernt, um das automatische Ändern des Modells zu verhindern.
+        # if "analysis" in results:
+        #     self.scene.update_from_analysis(results["analysis"])
         self.plot_dialog = PlotDialog(results, self); self.plot_dialog.show()
         
     def on_simulation_error(self, message):
