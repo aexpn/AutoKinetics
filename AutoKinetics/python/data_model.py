@@ -1,9 +1,9 @@
 import numpy as np
 
-R = 8.31446261815324  # Universelle Gaskonstante in J/(mol·K)
+R = 8.31446261815324  # Universal gas constant in J/(mol·K)
 
 class Species:
-    """Repräsentiert eine einzelne chemische Spezies mit ihren Eigenschaften."""
+    """Represents a single chemical species with its properties."""
     def __init__(self, name, **kwargs):
         self.name = name
         self.start_concentration = float(kwargs.get('start_concentration', 1.0))
@@ -13,7 +13,7 @@ class Species:
             setattr(self, key, value)
 
 class Reaction:
-    """Repräsentiert eine einzelne Reaktion mit ihren kinetischen Parametern."""
+    """Represents a single reaction with its kinetic parameters."""
     def __init__(self, reactants, products, rate_label, **params):
         self.reactants = reactants
         self.products = products
@@ -25,24 +25,29 @@ class Reaction:
         
         self.reaction_order = {}
         try:
-            order_val = float(params.get('reaction_order', '1'))
+            # Try to read an explicit overall reaction order from the file.
+            order_val = float(params.get('reaction_order', ''))
             for r_idx, _ in self.reactants:
                 self.reaction_order[r_idx] = order_val
         except (ValueError, TypeError):
-            # Fallback, falls 'reaction_order' keine gültige Zahl ist
-            for r_idx, stoich in self.reactants:
-                # Standardmäßig wird die Ordnung gleich dem stöchiometrischen Faktor gesetzt
-                self.reaction_order[r_idx] = stoich
+            # If 'reaction_order' is not a valid number (e.g., empty string),
+            # the default behavior is to use the stoichiometry of each reactant as its partial order.
+            reactant_counts = {}
+            for r_idx, stoich_in_tuple in self.reactants:
+                reactant_counts[r_idx] = reactant_counts.get(r_idx, 0) + stoich_in_tuple
+            
+            for r_idx, total_stoich in reactant_counts.items():
+                self.reaction_order[r_idx] = total_stoich
 
     def calculate_k(self, T):
-        """Berechnet die Geschwindigkeitskonstante k bei Temperatur T."""
+        """Calculates the rate constant k at temperature T."""
         if self.arrhenius_A == 0: return 0.0
         Ea_J_mol = self.activation_energy_Ea
         k = self.arrhenius_A * (T ** self.temp_exponent_n) * np.exp(-Ea_J_mol / (R * T))
         return k
 
 class ReactionSystem:
-    """Verwaltet das gesamte System aus Spezies und Reaktionen."""
+    """Manages the entire system of species and reactions."""
     def __init__(self, species_list, reaction_list):
         self.species = species_list
         self.reactions = reaction_list
@@ -52,7 +57,7 @@ class ReactionSystem:
         return np.array([s.start_concentration for s in self.species])
 
     def get_rate_law_equations(self):
-        """Erstellt eine korrekte textuelle Darstellung des differentiellen Zeitgesetzes."""
+        """Creates a correct textual representation of the differential rate law."""
         equations = []
         species_names = [s.name for s in self.species]
         
@@ -61,34 +66,48 @@ class ReactionSystem:
             rhs_terms = []
 
             for reaction in self.reactions:
-                # Der Ratenterm (v) = k * [Edukt1]^ordnung1 * [Edukt2]^ordnung2
                 rate_expression_parts = [reaction.rate_label]
+                
+                reactant_orders = {}
                 for reactant_idx, _ in reaction.reactants:
+                    # ** BUG FIX IS HERE **
+                    # Was: self.reaction_order.get(...)
+                    # Now: reaction.reaction_order.get(...)
                     order = reaction.reaction_order.get(reactant_idx, 1.0)
+                    reactant_orders[reactant_idx] = order
+                
+                for reactant_idx, order in sorted(reactant_orders.items()):
                     order_str = f"^{order}" if order != 1.0 else ""
                     rate_expression_parts.append(f"[{species_names[reactant_idx]}]" + order_str)
+
                 rate_expr = " * ".join(rate_expression_parts)
 
-                # Die Änderungsrate ist ±stöchiometrischer_Faktor * v
+                net_stoichiometry = 0
                 for reactant_idx, stoich in reaction.reactants:
                     if reactant_idx == i:
-                        stoich_str = f"{stoich} * " if stoich != 1 else ""
-                        rhs_terms.append(f"- {stoich_str}{rate_expr}")
-                        
+                        net_stoichiometry -= stoich
                 for product_idx, stoich in reaction.products:
                     if product_idx == i:
-                        stoich_str = f"{stoich} * " if stoich != 1 else ""
-                        rhs_terms.append(f"+ {stoich_str}{rate_expr}")
+                        net_stoichiometry += stoich
+
+                if net_stoichiometry != 0:
+                    if net_stoichiometry > 0:
+                        sign = "+"
+                    else:
+                        sign = "-"
+                    
+                    abs_stoich = abs(net_stoichiometry)
+                    stoich_str = f"{abs_stoich} * " if abs_stoich != 1 else ""
+                    rhs_terms.append(f"{sign} {stoich_str}{rate_expr}")
             
             if not rhs_terms:
                 rhs = " 0.0"
             else:
-                rhs = " ".join(rhs_terms)
-                # Führendes '+' oder '-' anpassen für saubere Darstellung
+                rhs = " ".join(sorted(rhs_terms))
                 if rhs.startswith("+ "):
-                    rhs = rhs[1:]
+                    rhs = rhs[2:]
                 elif rhs.startswith("- "):
-                    rhs = "-" + rhs[1:]
+                    rhs = rhs[0] + rhs[2:]
 
             equations.append(lhs + rhs)
             
