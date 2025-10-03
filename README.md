@@ -3,28 +3,30 @@
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Framework](https://img.shields.io/badge/Framework-PyQt6-green.svg)](https://www.qt.io/qt-for-python)
 
-A computational tool for the visual construction and numerical simulation of chemical kinetic systems. AutoKinetics bridges the gap between the intuitive, graphical representation of reaction mechanisms and rigorous quantitative analysis, making it an ideal tool for researchers, educators, and students in chemical engineering and physical chemistry.
+As a student who has taken Physical Chemistry 1 and 3, I've always been fascinated by the intricate dance of molecules described by chemical kinetics. However, I often found the process of solving the complex systems of differential equations to be tedious and time-consuming, especially when applying the rigorous methods from my Mathematics for Physicists and Numerics courses.
+
+This project, AutoKinetics, was born from a desire to bridge that gap. It's a computational tool designed to handle the heavy mathematical lifting, allowing us to focus on the chemistry. It translates intuitive, visual representations of reaction mechanisms into a robust quantitative analysis, making it an ideal tool for researchers, educators, and students in chemical engineering and physical chemistry.
 
 ---
 
 ## 🔬 Core Features
 
 * **Visual Network Editor:** A drag-and-drop interface to build complex reaction networks using species, groups, and reaction arrows.
-* **Object-Oriented Data Model:** Each graphical element holds detailed chemical and physical properties (enthalpy, Arrhenius parameters, concentration, etc.).
+* **Object-Oriented Data Model:** Each graphical element holds detailed chemical and physical properties (e.g., enthalpy, Arrhenius parameters, concentration).
 * **Integrated ODE Backend:** A powerful backend engine using **SciPy** to solve the system of coupled ordinary differential equations (ODEs) that govern the system's temporal evolution.
-* **Automated Kinetic Analysis:** The backend automatically analyzes the simulation results to:
+* **Automated Kinetic Analysis:** The backend automatically analyzes simulation results to:
     * Determine the best-fit reaction order (0, 1st, or 2nd).
     * Calculate the effective rate constant ($k$) via linear regression.
-* **Data Persistence:** Save and load entire reaction networks using a human-readable JSON-based `.kin` file format.
-* **Result Visualization:** Automatically generates plots for concentration profiles, rate law analysis, reaction rates, and energy profiles.
+* **Data Persistence:** Save and load entire reaction networks using a human-readable, JSON-based `.kin` file format.
+* **Result Visualization:** Automatically generates plots for concentration profiles and rate law analysis.
 
 ---
 
 ## 📊 Example Simulation Output
 
-Below is an example of the output generated for the first-order isomerization of cyclopropane to propene. The application provides a comprehensive view of the system's dynamics.
-<img width="802" height="751" alt="Screenshot from 2025-10-03 00-23-31" src="https://github.com/user-attachments/assets/b301f5fa-6b0d-4132-bbd2-b306fd120e25" />
-<img width="802" height="751" alt="image" src="https://github.com/user-attachments/assets/ae3106f9-5380-4db1-9b26-8ff6d7d6849a" />
+Below are example outputs for the oscillating Lotka-Volterra predator-prey model. The application provides a comprehensive view of the system's dynamics.
+
+![Lotka-Volterra Simulation](https://i.imgur.com/K6b6hJ8.png)
 
 ---
 
@@ -107,7 +109,7 @@ The application is built on a decoupled frontend-backend architecture.
     ```
 
 3.  **Install the required libraries:**
-    A `requirements.txt` file should be created with the following content:
+    Create a `requirements.txt` file with the following content:
     ```
     numpy
     scipy
@@ -123,13 +125,13 @@ The application is built on a decoupled frontend-backend architecture.
 
 1.  **Launch the GUI:**
     ```bash
-    python python/gui.py
+    python gui.py
     ```
 
 2.  **Run the Backend Manually (for testing):**
-    The backend can be tested directly from the command line. It will use a default test file.
+    The backend can be tested directly from the command line by passing a `.kin` file.
     ```bash
-    python python/backend_main.py
+    python backend_main.py path/to/your/file.kin
     ```
 
 ---
@@ -147,7 +149,6 @@ The project state is saved in a JSON-based `.kin` file with the following main k
 
 Future development will focus on enhancing the scientific accuracy and user experience:
 
-* [ ] **Full Stoichiometry Support:** Implement a robust UI for editing stoichiometric coefficients and partial reaction orders for each species in a reaction.
 * [ ] **Interactive Plotting:** Replace static Matplotlib images with an interactive plotting widget (e.g., using `pyqtgraph`) directly within the GUI.
 * [ ] **Global Simulation Conditions:** Create a dedicated panel for global parameters like pressure and temperature, decoupling them from individual reactions.
 * [ ] **Reversible Reactions:** Update the ODE solver to correctly handle reversible reactions and equilibrium constants.
@@ -155,7 +156,8 @@ Future development will focus on enhancing the scientific accuracy and user expe
 * [ ] **Advanced Plotting:** Include plots of analytical solutions for simple-order reactions alongside the numerical results for comparison and verification.
 * [ ] **Machine Learning Integration:** Implement ML models to predict rate constants ($k$) from molecular features or to fit complex kinetic models to sparse experimental data.
 
-
 ---
 
 ## 📜 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
