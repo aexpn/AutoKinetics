@@ -1,6 +1,6 @@
 # backend/parser.py
 import json
-# KORREKTUR: Relative Imports entfernt
+from collections import Counter  # Importieren Sie den Counter
 from data_model import Species, Reaction, ReactionSystem
 
 def parse_kin_file(filepath):
@@ -10,14 +10,22 @@ def parse_kin_file(filepath):
 
     # 1. Spezies einlesen
     species_list = [Species(**s) for s in data['species']]
-    species_map = {s.name: i for i, s in enumerate(species_list)}
 
     # Hilfsfunktion, um Knoten (Spezies oder Gruppe) zu Spezies-Indizes aufzulösen
     def resolve_node(node_id, groups_map):
-        if isinstance(node_id, int): # Es ist bereits ein Spezies-Index
-            return [(node_id, 1)] # Annahme: Stöchiometrie ist 1
-        elif isinstance(node_id, str) and node_id in groups_map: # Es ist eine Gruppe
-            return [(item_idx, 1) for item_idx in groups_map[node_id]['items']]
+        """
+        Löst eine Knoten-ID (entweder ein Spezies-Index oder eine Gruppen-ID)
+        in eine Liste von Tupeln (spezies_index, stöchiometrie) auf.
+        """
+        if isinstance(node_id, int):  # Es ist bereits ein Spezies-Index
+            # Einzelne Spezies hat die Stöchiometrie 1
+            return [(node_id, 1)]
+        elif isinstance(node_id, str) and node_id in groups_map:  # Es ist eine Gruppe
+            # Zähle die Vorkommen jedes Spezies-Index in der Gruppe
+            item_indices = groups_map[node_id]['items']
+            stoichiometry = Counter(item_indices)
+            # Gib die Liste der (spezies_index, anzahl) Tupel zurück
+            return list(stoichiometry.items())
         return []
 
     groups_map = {g['id']: g for g in data.get('groups', [])}
@@ -25,10 +33,13 @@ def parse_kin_file(filepath):
     # 2. Reaktionen einlesen
     reaction_list = []
     for r_data in data['arrows']:
+        # Wandle die Start- und Endknoten in Listen mit Stöchiometrie um
         reactants = resolve_node(r_data['start_id'], groups_map)
         products = resolve_node(r_data['end_id'], groups_map)
         
-        if not reactants or not products: continue
+        # Überspringe, falls Edukte oder Produkte leer sind
+        if not reactants or not products:
+            continue
 
         reaction = Reaction(reactants, products, r_data['rate_constant'], **r_data)
         reaction_list.append(reaction)
