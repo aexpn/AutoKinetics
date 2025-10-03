@@ -159,12 +159,3 @@ Future development will focus on enhancing the scientific accuracy and user expe
 ---
 
 ## 📜 License
-
-This project is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License (CC BY-NC-SA 4.0)**.
-
-**This means:**
-1. **Attribution (BY):** You must give appropriate credit to the creator.
-2. **Non-Commercial (NC):** Use **is prohibited for commercial purposes** (profit generation).
-3. **ShareAlike (SA):** Modified versions must be released under the same license.
-
-Further details can be found in the **`LICENSE`** file.
