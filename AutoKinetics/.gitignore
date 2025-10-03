@@ -30,5 +30,8 @@ pycache/
 *.whl
 Betriebssystem / Editor
 
+*.png
+*.kin
+
 .DS_Store
 *~
