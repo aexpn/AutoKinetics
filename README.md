@@ -24,11 +24,11 @@ This project, AutoKinetics, was born from a desire to bridge that gap. It's a co
 
 ## 📊 Example Simulation Output
 
-<img width="1407" height="907" alt="Screenshot from 2025-10-03 20-58-24" src="https://github.com/user-attachments/assets/75b76631-7753-4227-be0c-05a4f041833f" />
-<img width="1407" height="907" alt="Screenshot from 2025-10-03 20-58-12" src="https://github.com/user-attachments/assets/7e0ed7d9-e7d4-4aaf-befa-d58c25f253ce" />
-<img width="1407" height="907" alt="Screenshot from 2025-10-03 20-58-03" src="https://github.com/user-attachments/assets/8c1554dd-20b0-486a-95bd-ebcb6beddc06" />
-<img width="1407" height="907" alt="Screenshot from 2025-10-03 20-57-42" src="https://github.com/user-attachments/assets/e40a69da-55b4-4d82-bbee-fec4e4bad98f" />
 <img width="1407" height="907" alt="Screenshot from 2025-10-03 20-56-56" src="https://github.com/user-attachments/assets/b6208678-b1c0-47fd-88c4-9836a421e2e2" />
+<img width="1407" height="907" alt="Screenshot from 2025-10-03 20-57-42" src="https://github.com/user-attachments/assets/e40a69da-55b4-4d82-bbee-fec4e4bad98f" />
+<img width="1407" height="907" alt="Screenshot from 2025-10-03 20-58-03" src="https://github.com/user-attachments/assets/8c1554dd-20b0-486a-95bd-ebcb6beddc06" />
+<img width="1407" height="907" alt="Screenshot from 2025-10-03 20-58-12" src="https://github.com/user-attachments/assets/7e0ed7d9-e7d4-4aaf-befa-d58c25f253ce" />
+<img width="1407" height="907" alt="Screenshot from 2025-10-03 20-58-24" src="https://github.com/user-attachments/assets/75b76631-7753-4227-be0c-05a4f041833f" />
 
 
 ---
