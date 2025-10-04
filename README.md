@@ -152,6 +152,7 @@ The project state is saved in a JSON-based `.kin` file with the following main k
 
 Future development will focus on enhancing the scientific accuracy and user experience:
 
+* [ ] **Unit Tests** Increase the stability of the code and make it resistant against bugs in future changes 
 * [ ] **Interactive Plotting:** Replace static Matplotlib images with an interactive plotting widget (e.g., using `pyqtgraph`) directly within the GUI.
 * [ ] **Global Simulation Conditions:** Create a dedicated panel for global parameters like pressure and temperature, decoupling them from individual reactions.
 * [ ] **Reversible Reactions:** Update the ODE solver to correctly handle reversible reactions and equilibrium constants.
