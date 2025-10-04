@@ -51,49 +51,38 @@ where:
 ### Reaction Rate Law
 The rate of an elementary reaction, $v_j$, is determined by the concentration of its reactants and a temperature-dependent rate constant, $k_j$. For a generic reaction, the rate is given by:
 
-$$
-v_j = k_j \prod_{r \in \text{reactants}} [X_r]^{m_r}
-$$
+## 🚀 Getting Started (Dockerized)
 
-where:
-- $[X_r]$ is the concentration of reactant $r$.
-- $m_r$ is the partial reaction order with respect to reactant $r$.
+You can build and run AutoKinetics in a fully automated, reproducible Docker container. No manual setup is required outside Docker.
 
-### Temperature Dependence
-The rate constant $k$ is calculated using the modified Arrhenius equation, which accounts for temperature dependence:
+### Build and Run with Docker
 
-$$
-k(T) = A \cdot T^n \cdot e^{-\frac{E_a}{RT}}
-$$
+1. **Build the Docker image:**
+   ```bash
+   docker build -t autokinetics .
+   ```
 
-where:
-- $A$ is the pre-exponential (Arrhenius) factor.
-- $T$ is the absolute temperature in Kelvin (K).
-- $n$ is the temperature exponent.
-- $E_a$ is the activation energy in Joules per mole (J/mol).
-- $R$ is the universal gas constant ($8.314 \text{ J/(mol·K)}$).
+2. **Run the container:**
+   ```bash
+   docker run --rm -it autokinetics
+   ```
 
-The backend solves this system of coupled, non-linear ODEs numerically using the `scipy.integrate.solve_ivp` function with the `Radau` method, which is well-suited for stiff systems often encountered in chemical kinetics.
+### Build and Run with Docker Compose
 
----
+1. **Start the service:**
+   ```bash
+   docker compose up --build
+   ```
 
-## 🛠️ Architecture
+2. **Stop the service:**
+   ```bash
+   docker compose down
+   ```
 
-The application is built on a decoupled frontend-backend architecture.
-
-* **Frontend (`gui.py`):** A graphical user interface built with **PyQt6**. It manages user interaction, visual scene construction, and property editing. It communicates with the backend by passing a `.kin` file.
-* **Backend (Python Scripts):** A headless set of scripts (`backend_main.py`, `simulator.py`, `analyzer.py`, etc.) that performs all heavy computations.
-    * It parses the `.kin` file.
-    * It solves the ODE system using **NumPy** and **SciPy**.
-    * It generates result plots as image files using **Matplotlib**.
-    * It returns all simulation and analysis data as a single JSON object to standard output.
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
+### Notes
+- The build process (C++ and Python) is fully automated inside the container.
+- Source code changes in the host directory are reflected in the container (via volume mount in docker-compose).
+- You can modify the `CMD` in the Dockerfile or `command` in `docker-compose.yml` to run other scripts.
 * Python 3.9+
 * Git
 

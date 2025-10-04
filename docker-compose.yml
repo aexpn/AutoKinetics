@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  autokinetics:
+    build: .
+    container_name: autokinetics_app
+    working_dir: /app/AutoKinetics/python
+    volumes:
+      - .:/app
+    command: python3 backend_main.py
+    # Uncomment below to expose ports if needed for GUI or API
+    # ports:
+    #   - "8080:8080"
